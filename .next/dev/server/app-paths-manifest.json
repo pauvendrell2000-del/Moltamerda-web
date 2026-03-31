@@ -1,0 +1,7 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/admin/login/page": "app/[locale]/admin/login/page.js",
+  "/[locale]/admin/dashboard/page": "app/[locale]/admin/dashboard/page.js",
+  "/[locale]/admin/reservas/[id]/page": "app/[locale]/admin/reservas/[id]/page.js"
+}

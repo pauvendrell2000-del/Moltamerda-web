@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1A2332;
+  --color-primary-hover: #243144;
+  --color-accent: #00A878;
+  --color-accent-hover: #009068;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F8FAFC;
+  --color-text-primary: #0F1923;
+  --color-text-secondary: #6B7280;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* CSS variables para compatibilidad con tipos */
+:root {
+  --primary: 26 35 50;
+  --primary-hover: 36 49 68;
+  --accent: 0 168 120;
+  --surface: 255 255 255;
+  --surface-alt: 248 250 252;
+  --text-primary: 15 25 35;
+  --text-secondary: 107 114 128;
+
+  /* Status colors */
+  --status-pending-bg: 254 243 199;
+  --status-pending-text: 146 64 14;
+  --status-pending-border: 253 230 138;
+  --status-confirmed-bg: 209 250 229;
+  --status-confirmed-text: 6 95 70;
+  --status-confirmed-border: 167 243 208;
+  --status-canceled-bg: 254 226 226;
+  --status-canceled-text: 153 27 27;
+  --status-canceled-border: 252 165 165;
+  --status-completed-bg: 237 233 254;
+  --status-completed-text: 91 33 182;
+  --status-completed-border: 196 181 253;
+}

@@ -1,0 +1,23 @@
+{"timestamp":"00:00:07.414","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:18.341","source":"Server","level":"LOG","message":"○ Compiling /[locale] ..."}
+{"timestamp":"00:00:27.187","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:27.970","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:07.610","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:09.999","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:21.589","source":"Server","level":"LOG","message":"○ Compiling /[locale]/admin/dashboard ..."}
+{"timestamp":"00:01:25.825","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:28.312","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:49.063","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:51.529","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"01:04:14.459","source":"Server","level":"ERROR","message":"Error: write EPIPE"}
+{"timestamp":"01:04:14.460","source":"Server","level":"ERROR","message":"⨯ \"uncaughtException:\" Error: write EPIPE"}
+{"timestamp":"01:04:14.460","source":"Server","level":"ERROR","message":"⨯ \"uncaughtException: \" Error: write EPIPE"}
+{"timestamp":"00:08:28.782","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:08:34.476","source":"Server","level":"ERROR","message":"⨯ SyntaxError: Unexpected non-whitespace character after JSON at position 344 (line 18 column 2)"}
+{"timestamp":"00:08:34.602","source":"Server","level":"WARN","message":"⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload"}
+{"timestamp":"00:08:34.948","source":"Server","level":"WARN","message":"⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload"}
+{"timestamp":"00:08:36.067","source":"Server","level":"ERROR","message":"⨯ Failed to generate static paths for /[locale]/admin/dashboard:"}
+{"timestamp":"00:08:36.070","source":"Server","level":"ERROR","message":"PageNotFoundError: Cannot find module for page: /[locale]/admin/dashboard/page"}
+{"timestamp":"00:08:37.509","source":"Server","level":"LOG","message":"○ Compiling /_error ..."}
+{"timestamp":"00:08:43.158","source":"Server","level":"WARN","message":"⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload"}
+{"timestamp":"00:08:45.640","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
