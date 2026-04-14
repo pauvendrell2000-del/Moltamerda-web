@@ -102,7 +102,7 @@ export async function POST(request: Request) {
       if (process.env.RESEND_API_KEY) {
         const { Resend } = await import('resend')
         const resend = new Resend(process.env.RESEND_API_KEY)
-        const from = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+        const from = process.env.RESEND_FROM_EMAIL ?? 'noreply@moltamerda.net'
 
         const LABELS_SERVICIO: Record<string, string> = {
           maquinas_agricolas: 'Limpieza Máquinas Agrícolas',
