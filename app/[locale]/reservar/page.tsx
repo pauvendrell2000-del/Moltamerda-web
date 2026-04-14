@@ -7,50 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, CheckCircle2, User, Briefcase, Calendar, Loader2 } from "lucide-react";
-import { LABELS_TIPO_SERVICIO, LABELS_FRANJA_HORARIA } from "@/types/reservas";
 import { format, addDays, isWeekend } from "date-fns";
-
-// ── Schema de validación ────────────────────────────────────────
-const paso1Schema = z.object({
-  nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  tipo_cliente: z.enum(["empresa", "particular"]),
-  empresa: z.string().optional(),
-  email: z.string().email("Email inválido"),
-  telefono: z.string().min(9, "Teléfono inválido").max(15, "Teléfono demasiado largo"),
-});
-
-const paso2Schema = z.object({
-  tipo_servicio: z.enum([
-    "maquinas_agricolas",
-    "maquinaria_industrial",
-    "naves_piscinas",
-    "naves_ganaderas",
-    "fumigacion_hipicas",
-    "fumigacion_centros_caninos",
-  ]),
-  superficie_m2: z.coerce.number().min(10, "Mínimo 10 m²").max(10000, "Máximo 10.000 m²"),
-  direccion: z.string().min(5, "Dirección requerida"),
-  ciudad: z.string().min(2, "Ciudad requerida"),
-  codigo_postal: z.string().regex(/^\d{5}$/, "Código postal debe tener 5 dígitos"),
-});
-
-const paso3Schema = z.object({
-  fecha: z.string().min(1, "Selecciona una fecha"),
-  franja_horaria: z.enum(["manana", "tarde"]),
-  observaciones: z.string().max(500, "Máximo 500 caracteres").optional(),
-});
-
-const formSchema = paso1Schema.merge(paso2Schema).merge(paso3Schema).refine(
-  (data) => {
-    if (data.tipo_cliente === "empresa") {
-      return !!data.empresa && data.empresa.trim().length > 0;
-    }
-    return true;
-  },
-  { message: "El nombre de empresa es requerido", path: ["empresa"] }
-);
-
-type FormData = z.infer<typeof formSchema>;
+import { getT } from "@/lib/i18n";
 
 // ── Helpers ─────────────────────────────────────────────────────
 const today = new Date();
@@ -58,7 +16,6 @@ today.setHours(0, 0, 0, 0);
 const maxDate = addDays(today, 60);
 
 function getMinDate() {
-  // Next working day
   let d = addDays(today, 1);
   while (isWeekend(d)) d = addDays(d, 1);
   return format(d, "yyyy-MM-dd");
@@ -109,61 +66,56 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement> & { error?:
   );
 }
 
-// ── Pasos indicador ──────────────────────────────────────────────
-function StepIndicator({ currentStep }: { currentStep: number }) {
-  const pasos = [
-    { num: 1, label: "Tus Datos", icon: User },
-    { num: 2, label: "Servicio", icon: Briefcase },
-    { num: 3, label: "Fecha", icon: Calendar },
-  ];
-
-  return (
-    <div className="flex items-center justify-center mb-10">
-      {pasos.map((paso, index) => {
-        const Icon = paso.icon;
-        const isActive = paso.num === currentStep;
-        const isDone = paso.num < currentStep;
-        return (
-          <div key={paso.num} className="flex items-center">
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isDone
-                    ? "bg-[#00A878] text-white"
-                    : isActive
-                    ? "bg-[#1A2332] text-white shadow-lg shadow-[#1A2332]/25"
-                    : "bg-slate-100 text-slate-400"
-                }`}
-              >
-                {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-              </div>
-              <span
-                className={`text-xs mt-1.5 font-medium ${
-                  isActive ? "text-[#1A2332]" : isDone ? "text-[#00A878]" : "text-slate-400"
-                }`}
-              >
-                {paso.label}
-              </span>
-            </div>
-            {index < pasos.length - 1 && (
-              <div
-                className={`w-16 sm:w-24 h-0.5 mx-2 mb-5 transition-all duration-300 ${
-                  paso.num < currentStep ? "bg-[#00A878]" : "bg-slate-200"
-                }`}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ── Formulario principal ─────────────────────────────────────────
 export default function ReservarPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) ?? "ca";
+  const t = getT(locale);
+  const tr = t.reserva;
+
+  // ── Schema de validación (con mensajes localizados) ──────────
+  const paso1Schema = z.object({
+    nombre: z.string().min(2, tr.validacio.nomCurt),
+    tipo_cliente: z.enum(["empresa", "particular"]),
+    empresa: z.string().optional(),
+    email: z.string().email(tr.validacio.emailInvalid),
+    telefono: z.string().min(9, tr.validacio.telefonInvalid).max(15, tr.validacio.telefonLlarg),
+  });
+
+  const paso2Schema = z.object({
+    tipo_servicio: z.enum([
+      "maquinas_agricolas",
+      "maquinaria_industrial",
+      "naves_piscinas",
+      "naves_ganaderas",
+      "fumigacion_hipicas",
+      "fumigacion_centros_caninos",
+    ]),
+    superficie_m2: z.coerce.number().min(10, tr.validacio.superficieMin).max(10000, tr.validacio.superficieMax),
+    direccion: z.string().min(5, tr.validacio.adrecaRequerida),
+    ciudad: z.string().min(2, tr.validacio.ciutatRequerida),
+    codigo_postal: z.string().regex(/^\d{5}$/, tr.validacio.codiPostalInvalid),
+  });
+
+  const paso3Schema = z.object({
+    fecha: z.string().min(1, tr.validacio.dataRequerida),
+    franja_horaria: z.enum(["manana", "tarde"]),
+    observaciones: z.string().max(500, tr.validacio.observacionsMax).optional(),
+  });
+
+  const formSchema = paso1Schema.merge(paso2Schema).merge(paso3Schema).refine(
+    (data) => {
+      if (data.tipo_cliente === "empresa") {
+        return !!data.empresa && data.empresa.trim().length > 0;
+      }
+      return true;
+    },
+    { message: tr.validacio.empresaRequerida, path: ["empresa"] }
+  );
+
+  type FormData = z.infer<typeof formSchema>;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -186,7 +138,6 @@ export default function ReservarPage() {
   const tipoCliente = watch("tipo_cliente");
   const observaciones = watch("observaciones") ?? "";
 
-  // Validar paso actual antes de avanzar
   const handleNextStep = async () => {
     let valid = false;
     if (currentStep === 1) {
@@ -211,18 +162,25 @@ export default function ReservarPage() {
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "Error al crear la reserva");
+        throw new Error(json.error ?? tr.toast.error);
       }
 
-      toast.success("¡Reserva creada con éxito!");
+      toast.success(tr.toast.exit);
       router.push(`/${locale}/confirmacion/${json.data.id}?codigo=${json.data.codigo}`);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al enviar la reserva";
+      const message = err instanceof Error ? err.message : tr.toast.error;
       toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // ── Step indicator ───────────────────────────────────────────
+  const pasos = [
+    { num: 1, label: tr.passos[0], icon: User },
+    { num: 2, label: tr.passos[1], icon: Briefcase },
+    { num: 3, label: tr.passos[2], icon: Calendar },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -231,16 +189,54 @@ export default function ReservarPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <a href={`/${locale}`} className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm">
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
+            {tr.tornar}
           </a>
-          <h1 className="font-semibold font-display">Solicitar Servicio</h1>
+          <h1 className="font-semibold font-display">{tr.titolPagina}</h1>
           <div />
         </div>
       </header>
 
       {/* Body */}
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
-        <StepIndicator currentStep={currentStep} />
+        {/* Step indicator */}
+        <div className="flex items-center justify-center mb-10">
+          {pasos.map((paso, index) => {
+            const Icon = paso.icon;
+            const isActive = paso.num === currentStep;
+            const isDone = paso.num < currentStep;
+            return (
+              <div key={paso.num} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      isDone
+                        ? "bg-[#00A878] text-white"
+                        : isActive
+                        ? "bg-[#1A2332] text-white shadow-lg shadow-[#1A2332]/25"
+                        : "bg-slate-100 text-slate-400"
+                    }`}
+                  >
+                    {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                  </div>
+                  <span
+                    className={`text-xs mt-1.5 font-medium ${
+                      isActive ? "text-[#1A2332]" : isDone ? "text-[#00A878]" : "text-slate-400"
+                    }`}
+                  >
+                    {paso.label}
+                  </span>
+                </div>
+                {index < pasos.length - 1 && (
+                  <div
+                    className={`w-16 sm:w-24 h-0.5 mx-2 mb-5 transition-all duration-300 ${
+                      paso.num < currentStep ? "bg-[#00A878]" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <form onSubmit={handleSubmit(onSubmit as any)}>
@@ -250,16 +246,16 @@ export default function ReservarPage() {
             {currentStep === 1 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-bold font-display text-[#0F1923]">Tus datos de contacto</h2>
-                  <p className="text-slate-500 text-sm mt-1">Los usaremos para confirmar tu reserva</p>
+                  <h2 className="text-xl font-bold font-display text-[#0F1923]">{tr.pas1.titol}</h2>
+                  <p className="text-slate-500 text-sm mt-1">{tr.pas1.subtitol}</p>
                 </div>
 
                 {/* Nombre */}
                 <div>
-                  <Label required>Nombre completo</Label>
+                  <Label required>{tr.pas1.nom}</Label>
                   <Input
                     {...register("nombre")}
-                    placeholder="Juan García López"
+                    placeholder={tr.pas1.nomPlaceholder}
                     error={errors.nombre?.message}
                   />
                   <FieldError message={errors.nombre?.message} />
@@ -267,7 +263,7 @@ export default function ReservarPage() {
 
                 {/* Tipo cliente */}
                 <div>
-                  <Label required>Tipo de cliente</Label>
+                  <Label required>{tr.pas1.tipusClient}</Label>
                   <Controller
                     name="tipo_cliente"
                     control={control}
@@ -284,7 +280,7 @@ export default function ReservarPage() {
                                 : "border-slate-200 text-slate-500 hover:border-slate-300"
                             }`}
                           >
-                            {tipo === "particular" ? "Particular" : "Empresa"}
+                            {tipo === "particular" ? tr.pas1.particular : tr.pas1.empresa}
                           </button>
                         ))}
                       </div>
@@ -295,10 +291,10 @@ export default function ReservarPage() {
                 {/* Empresa (condicional) */}
                 {tipoCliente === "empresa" && (
                   <div>
-                    <Label required>Nombre de la empresa</Label>
+                    <Label required>{tr.pas1.nomEmpresa}</Label>
                     <Input
                       {...register("empresa")}
-                      placeholder="Mi Empresa S.L."
+                      placeholder={tr.pas1.nomEmpresaPlaceholder}
                       error={errors.empresa?.message}
                     />
                     <FieldError message={errors.empresa?.message} />
@@ -307,11 +303,11 @@ export default function ReservarPage() {
 
                 {/* Email */}
                 <div>
-                  <Label required>Email</Label>
+                  <Label required>{tr.pas1.email}</Label>
                   <Input
                     {...register("email")}
                     type="email"
-                    placeholder="juan@ejemplo.com"
+                    placeholder={tr.pas1.emailPlaceholder}
                     error={errors.email?.message}
                   />
                   <FieldError message={errors.email?.message} />
@@ -319,11 +315,11 @@ export default function ReservarPage() {
 
                 {/* Teléfono */}
                 <div>
-                  <Label required>Teléfono</Label>
+                  <Label required>{tr.pas1.telefon}</Label>
                   <Input
                     {...register("telefono")}
                     type="tel"
-                    placeholder="+34 o 6/7/8/9 + 8 dígitos"
+                    placeholder={tr.pas1.telefonPlaceholder}
                     error={errors.telefono?.message}
                   />
                   <FieldError message={errors.telefono?.message} />
@@ -335,16 +331,16 @@ export default function ReservarPage() {
             {currentStep === 2 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-bold font-display text-[#0F1923]">Detalles del servicio</h2>
-                  <p className="text-slate-500 text-sm mt-1">Cuéntanos qué necesitas y dónde</p>
+                  <h2 className="text-xl font-bold font-display text-[#0F1923]">{tr.pas2.titol}</h2>
+                  <p className="text-slate-500 text-sm mt-1">{tr.pas2.subtitol}</p>
                 </div>
 
                 {/* Tipo servicio */}
                 <div>
-                  <Label required>Tipo de servicio</Label>
+                  <Label required>{tr.pas2.tipusServei}</Label>
                   <Select {...register("tipo_servicio")} error={errors.tipo_servicio?.message}>
-                    <option value="">Selecciona un servicio...</option>
-                    {(Object.entries(LABELS_TIPO_SERVICIO) as [string, string][]).map(([value, label]) => (
+                    <option value="">{tr.pas2.tipusServeiPlaceholder}</option>
+                    {(Object.entries(tr.pas2.serveis) as [string, string][]).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
                   </Select>
@@ -353,7 +349,7 @@ export default function ReservarPage() {
 
                 {/* Superficie */}
                 <div>
-                  <Label required>Superficie aproximada (m²)</Label>
+                  <Label required>{tr.pas2.superficie}</Label>
                   <Input
                     {...register("superficie_m2")}
                     type="number"
@@ -367,10 +363,10 @@ export default function ReservarPage() {
 
                 {/* Dirección */}
                 <div>
-                  <Label required>Dirección</Label>
+                  <Label required>{tr.pas2.adreca}</Label>
                   <Input
                     {...register("direccion")}
-                    placeholder="Calle Mayor, 15"
+                    placeholder={tr.pas2.adrecaPlaceholder}
                     error={errors.direccion?.message}
                   />
                   <FieldError message={errors.direccion?.message} />
@@ -379,19 +375,19 @@ export default function ReservarPage() {
                 {/* Ciudad + CP en fila */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label required>Ciudad</Label>
+                    <Label required>{tr.pas2.ciutat}</Label>
                     <Input
                       {...register("ciudad")}
-                      placeholder="Barcelona"
+                      placeholder={tr.pas2.ciutatPlaceholder}
                       error={errors.ciudad?.message}
                     />
                     <FieldError message={errors.ciudad?.message} />
                   </div>
                   <div>
-                    <Label required>Código postal</Label>
+                    <Label required>{tr.pas2.codiPostal}</Label>
                     <Input
                       {...register("codigo_postal")}
-                      placeholder="08001"
+                      placeholder={tr.pas2.codiPostalPlaceholder}
                       maxLength={5}
                       error={errors.codigo_postal?.message}
                     />
@@ -405,13 +401,13 @@ export default function ReservarPage() {
             {currentStep === 3 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-bold font-display text-[#0F1923]">Fecha y franja horaria</h2>
-                  <p className="text-slate-500 text-sm mt-1">Elige cuándo quieres que vayamos</p>
+                  <h2 className="text-xl font-bold font-display text-[#0F1923]">{tr.pas3.titol}</h2>
+                  <p className="text-slate-500 text-sm mt-1">{tr.pas3.subtitol}</p>
                 </div>
 
                 {/* Fecha */}
                 <div>
-                  <Label required>Fecha del servicio</Label>
+                  <Label required>{tr.pas3.dataServei}</Label>
                   <Input
                     {...register("fecha")}
                     type="date"
@@ -419,13 +415,13 @@ export default function ReservarPage() {
                     max={getMaxDate()}
                     error={errors.fecha?.message}
                   />
-                  <p className="text-slate-400 text-xs mt-1">Solo días laborables (lunes a viernes)</p>
+                  <p className="text-slate-400 text-xs mt-1">{tr.pas3.diesLaborables}</p>
                   <FieldError message={errors.fecha?.message} />
                 </div>
 
                 {/* Franja horaria */}
                 <div>
-                  <Label required>Franja horaria</Label>
+                  <Label required>{tr.pas3.franjaHoraria}</Label>
                   <Controller
                     name="franja_horaria"
                     control={control}
@@ -443,10 +439,10 @@ export default function ReservarPage() {
                             }`}
                           >
                             <div className={`font-semibold text-sm ${field.value === franja ? "text-[#00A878]" : "text-[#0F1923]"}`}>
-                              {franja === "manana" ? "Mañana" : "Tarde"}
+                              {franja === "manana" ? tr.pas3.franja.manana : tr.pas3.franja.tarde}
                             </div>
                             <div className="text-xs text-slate-500 mt-0.5">
-                              {LABELS_FRANJA_HORARIA[franja].replace(/Mañana|Tarde/, "").trim()}
+                              {franja === "manana" ? tr.pas3.franja.mananaHores : tr.pas3.franja.tardeHores}
                             </div>
                           </button>
                         ))}
@@ -458,11 +454,14 @@ export default function ReservarPage() {
 
                 {/* Observaciones */}
                 <div>
-                  <Label>Observaciones <span className="text-slate-400 font-normal">(opcional)</span></Label>
+                  <Label>
+                    {tr.pas3.observacions}{" "}
+                    <span className="text-slate-400 font-normal">{tr.pas3.opcional}</span>
+                  </Label>
                   <textarea
                     {...register("observaciones")}
                     rows={4}
-                    placeholder="Indica cualquier detalle relevante: accesos especiales, materiales en el lugar, condiciones específicas..."
+                    placeholder={tr.pas3.observacionsPlaceholder}
                     maxLength={500}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0F1923] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00A878]/30 focus:border-[#00A878] transition-all resize-none"
                   />
@@ -483,7 +482,7 @@ export default function ReservarPage() {
                   className="flex items-center gap-2 text-slate-500 hover:text-[#0F1923] transition-colors font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Atrás
+                  {tr.nav.enrere}
                 </button>
               ) : (
                 <div />
@@ -495,7 +494,7 @@ export default function ReservarPage() {
                   onClick={handleNextStep}
                   className="flex items-center gap-2 bg-[#1A2332] hover:bg-[#243144] text-white font-semibold px-6 py-3 rounded-xl transition-all"
                 >
-                  Continuar
+                  {tr.nav.continuar}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -507,12 +506,12 @@ export default function ReservarPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enviando...
+                      {tr.nav.enviant}
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="w-4 h-4" />
-                      Confirmar reserva
+                      {tr.nav.confirmar}
                     </>
                   )}
                 </button>
@@ -525,15 +524,15 @@ export default function ReservarPage() {
         <div className="mt-6 flex flex-wrap gap-4 justify-center text-sm text-slate-400">
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-[#00A878]" />
-            Sin compromiso
+            {tr.peu.senseCompromis}
           </span>
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-[#00A878]" />
-            Confirmación en 24h
+            {tr.peu.confirmacio24h}
           </span>
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-[#00A878]" />
-            Presupuesto gratuito
+            {tr.peu.pressupostGratuit}
           </span>
         </div>
       </main>

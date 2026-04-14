@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, ArrowLeft, Calendar, Mail } from "lucide-react";
+import { getT } from "@/lib/i18n";
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -9,6 +10,8 @@ interface Props {
 export default async function ConfirmacionPage({ params, searchParams }: Props) {
   const { locale, id } = await params;
   const { codigo } = await searchParams;
+  const t = getT(locale);
+  const tr = t.confirmacio;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
@@ -20,9 +23,9 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
             className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
+            {tr.tornar}
           </Link>
-          <h1 className="font-semibold font-display">Confirmación</h1>
+          <h1 className="font-semibold font-display">{tr.titol}</h1>
           <div />
         </div>
       </header>
@@ -43,20 +46,20 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold font-display text-[#0F1923] mb-2">
-              ¡Reserva Confirmada!
+              {tr.titolCard}
             </h1>
             <p className="text-slate-500 mb-8">
-              Hemos recibido tu solicitud correctamente.
+              {tr.subtitol}
             </p>
 
             {/* Código de reserva */}
             {codigo && (
               <div className="bg-[#F8FAFC] border-2 border-dashed border-slate-200 rounded-xl p-6 mb-8">
-                <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">Código de reserva</p>
+                <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">{tr.codiReserva}</p>
                 <p className="text-4xl font-bold font-mono text-[#1A2332] tracking-wider">
                   {codigo}
                 </p>
-                <p className="text-xs text-slate-400 mt-2">Guarda este código para hacer seguimiento</p>
+                <p className="text-xs text-slate-400 mt-2">{tr.guardaCodi}</p>
               </div>
             )}
 
@@ -67,8 +70,8 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
                   <Mail className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#0F1923]">Email de confirmación</p>
-                  <p className="text-xs text-slate-500">Recibirás un email de confirmación en breve con todos los detalles.</p>
+                  <p className="text-sm font-medium text-[#0F1923]">{tr.emailTitol}</p>
+                  <p className="text-xs text-slate-500">{tr.emailDesc}</p>
                 </div>
               </div>
 
@@ -77,8 +80,8 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
                   <Calendar className="w-4 h-4 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#0F1923]">Confirmación en 24h</p>
-                  <p className="text-xs text-slate-500">Nuestro equipo revisará tu solicitud y te contactará para confirmar el servicio.</p>
+                  <p className="text-sm font-medium text-[#0F1923]">{tr.confirmacioTitol}</p>
+                  <p className="text-xs text-slate-500">{tr.confirmacioDesc}</p>
                 </div>
               </div>
             </div>
@@ -89,13 +92,13 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
               className="inline-flex items-center justify-center gap-2 w-full bg-[#1A2332] hover:bg-[#243144] text-white font-semibold px-6 py-4 rounded-xl transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
-              Volver al inicio
+              {tr.tornar}
             </Link>
 
             <p className="text-xs text-slate-400 mt-4">
-              ¿Tienes alguna pregunta?{" "}
+              {tr.pregunta}{" "}
               <a href="mailto:info@limpiezaindustrial.es" className="text-[#00A878] hover:underline">
-                Contáctanos
+                {tr.contacta}
               </a>
             </p>
           </div>
@@ -103,7 +106,7 @@ export default async function ConfirmacionPage({ params, searchParams }: Props) 
           {/* ID de reserva */}
           {id && (
             <p className="text-center text-xs text-slate-400 mt-4">
-              ID de reserva: <span className="font-mono">{id}</span>
+              {tr.idReserva} <span className="font-mono">{id}</span>
             </p>
           )}
         </div>

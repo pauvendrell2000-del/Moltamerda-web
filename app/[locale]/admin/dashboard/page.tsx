@@ -16,12 +16,11 @@ import {
   Users,
   LogOut,
   Eye,
-  CheckCircle2,
-  XCircle,
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 import DashboardFilters from "./DashboardFilters";
+import { ConfirmarBtn, CancelarBtn } from "./ReservaActions";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -294,27 +293,3 @@ export default async function DashboardPage({ params, searchParams }: Props) {
   );
 }
 
-// Componentes de acción (client components inline no es ideal pero sirve)
-function ConfirmarBtn({ reservaId }: { reservaId: string }) {
-  return (
-    <a
-      href={`/api/reservas/${reservaId}?estado=confirmada`}
-      className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-      title="Confirmar reserva"
-    >
-      <CheckCircle2 className="w-4 h-4" />
-    </a>
-  );
-}
-
-function CancelarBtn({ reservaId }: { reservaId: string }) {
-  return (
-    <a
-      href={`/api/reservas/${reservaId}?estado=cancelada`}
-      className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
-      title="Cancelar reserva"
-    >
-      <XCircle className="w-4 h-4" />
-    </a>
-  );
-}
