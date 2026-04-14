@@ -113,33 +113,6 @@ export async function POST(request: Request) {
           fumigacion_centros_caninos: 'Fumigación Centros Caninos',
         }
 
-        // Email al cliente
-        await resend.emails.send({
-          from,
-          to: datos.email,
-          subject: `Reserva ${codigo} recibida - Limpieza Industrial`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="background: #1A2332; padding: 32px; border-radius: 12px 12px 0 0;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">Reserva Recibida</h1>
-                <p style="color: #00A878; margin: 8px 0 0; font-size: 14px;">Código: ${codigo}</p>
-              </div>
-              <div style="background: #f8fafc; padding: 32px; border-radius: 0 0 12px 12px;">
-                <p style="color: #0F1923;">Hola ${datos.nombre},</p>
-                <p style="color: #6B7280;">Hemos recibido tu solicitud de servicio correctamente. Nuestro equipo la revisará y te contactará en menos de 24 horas para confirmar.</p>
-                <div style="background: white; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
-                  <p style="color: #6B7280; font-size: 12px; margin: 0 0 4px;">Código de reserva</p>
-                  <p style="color: #1A2332; font-size: 32px; font-weight: bold; font-family: monospace; margin: 0;">${codigo}</p>
-                </div>
-                <p style="color: #6B7280; font-size: 14px;">Fecha solicitada: ${datos.fecha} (${datos.franja_horaria === 'manana' ? 'Mañana 8:00-14:00' : 'Tarde 14:00-20:00'})</p>
-                <p style="color: #6B7280; font-size: 12px; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-                  Si tienes alguna pregunta, contáctanos en info@limpiezaindustrial.es
-                </p>
-              </div>
-            </div>
-          `,
-        })
-
         // Email de notificación al administrador
         if (process.env.RESEND_NOTIFY_EMAIL) {
           await resend.emails.send({
