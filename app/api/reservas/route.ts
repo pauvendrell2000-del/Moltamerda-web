@@ -97,13 +97,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Enviar email de confirmación (lazy - no falla el build si no está configurado)
+    // Enviar emails (no falla la reserva si hay error de email)
     try {
       if (process.env.RESEND_API_KEY) {
         const { Resend } = await import('resend')
         const resend = new Resend(process.env.RESEND_API_KEY)
+        const from = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+
+        const LABELS_SERVICIO: Record<string, string> = {
+          maquinas_agricolas: 'Limpieza Máquinas Agrícolas',
+          maquinaria_industrial: 'Limpieza Maquinaria Industrial',
+          naves_piscinas: 'Limpieza Naves y Piscinas',
+          naves_ganaderas: 'Limpieza Naves Ganaderas',
+          fumigacion_hipicas: 'Fumigación Hípicas',
+          fumigacion_centros_caninos: 'Fumigación Centros Caninos',
+        }
+
+        // Email al cliente
         await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL ?? 'Limpieza Industrial <noreply@limpiezaindustrial.es>',
+          from,
           to: datos.email,
           subject: `Reserva ${codigo} recibida - Limpieza Industrial`,
           html: `
@@ -114,8 +126,7 @@ export async function POST(request: Request) {
               </div>
               <div style="background: #f8fafc; padding: 32px; border-radius: 0 0 12px 12px;">
                 <p style="color: #0F1923;">Hola ${datos.nombre},</p>
-                <p style="color: #6B7280;">Hemos recibido tu solicitud de servicio correctamente.
-                Nuestro equipo la revisará y te contactará en menos de 24 horas para confirmar.</p>
+                <p style="color: #6B7280;">Hemos recibido tu solicitud de servicio correctamente. Nuestro equipo la revisará y te contactará en menos de 24 horas para confirmar.</p>
                 <div style="background: white; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
                   <p style="color: #6B7280; font-size: 12px; margin: 0 0 4px;">Código de reserva</p>
                   <p style="color: #1A2332; font-size: 32px; font-weight: bold; font-family: monospace; margin: 0;">${codigo}</p>
@@ -128,10 +139,93 @@ export async function POST(request: Request) {
             </div>
           `,
         })
+
+        // Email de notificación al administrador
+        if (process.env.RESEND_NOTIFY_EMAIL) {
+          await resend.emails.send({
+            from,
+            to: process.env.RESEND_NOTIFY_EMAIL,
+            subject: `Nueva reserva ${codigo} - ${datos.nombre}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #1A2332; padding: 32px; border-radius: 12px 12px 0 0;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">Nueva Reserva</h1>
+                  <p style="color: #00A878; margin: 8px 0 0; font-size: 14px;">Código: ${codigo}</p>
+                </div>
+                <div style="background: #f8fafc; padding: 32px; border-radius: 0 0 12px 12px;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td colspan="2" style="padding: 8px 0; border-bottom: 2px solid #e2e8f0;">
+                        <strong style="color: #1A2332; font-size: 16px;">Datos del cliente</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px; width: 40%;">Nombre</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px; font-weight: 600;">${datos.nombre}</td>
+                    </tr>
+                    ${datos.tipo_cliente === 'empresa' ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Empresa</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px; font-weight: 600;">${datos.empresa ?? '-'}</td>
+                    </tr>` : ''}
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Email</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;"><a href="mailto:${datos.email}" style="color: #00A878;">${datos.email}</a></td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Teléfono</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;"><a href="tel:${datos.telefono}" style="color: #00A878;">${datos.telefono}</a></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="padding: 16px 0 8px; border-bottom: 2px solid #e2e8f0;">
+                        <strong style="color: #1A2332; font-size: 16px;">Detalles del servicio</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Servicio</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px; font-weight: 600;">${LABELS_SERVICIO[datos.tipo_servicio] ?? datos.tipo_servicio}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Superficie</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;">${datos.superficie_m2} m²</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Dirección</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;">${datos.direccion}, ${datos.ciudad} ${datos.codigo_postal}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="padding: 16px 0 8px; border-bottom: 2px solid #e2e8f0;">
+                        <strong style="color: #1A2332; font-size: 16px;">Fecha y horario</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Fecha</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px; font-weight: 600;">${datos.fecha}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px;">Franja horaria</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;">${datos.franja_horaria === 'manana' ? 'Mañana (8:00 - 14:00)' : 'Tarde (14:00 - 20:00)'}</td>
+                    </tr>
+                    ${datos.observaciones ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6B7280; font-size: 14px; vertical-align: top;">Observaciones</td>
+                      <td style="padding: 8px 0; color: #0F1923; font-size: 14px;">${datos.observaciones}</td>
+                    </tr>` : ''}
+                  </table>
+                  <div style="margin-top: 24px; text-align: center;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/ca/admin/dashboard" style="display: inline-block; background: #1A2332; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                      Ver en el panel de administración
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `,
+          })
+        }
       }
     } catch (emailError) {
       // El email es opcional - no falla la creación de reserva
-      console.warn('No se pudo enviar email de confirmación:', emailError)
+      console.warn('No se pudo enviar email:', emailError)
     }
 
     return NextResponse.json({
