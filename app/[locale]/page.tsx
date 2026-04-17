@@ -171,16 +171,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                   </div>
                   <div>
                     <div className="text-xs text-slate-400">{t.why.contact.phone}</div>
-                    <div className="font-medium">+34 900 000 000</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-slate-600">
-                  <div className="w-10 h-10 bg-[#1A2332]/5 rounded-lg flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-[#1A2332]" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400">{t.why.contact.email}</div>
-                    <div className="font-medium">info@limpiezaindustrial.es</div>
+                    <div className="font-medium">606 771 734</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-slate-600">
